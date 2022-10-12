@@ -1,0 +1,24 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+include /usr/share/dpkg/architecture.mk
+include /usr/share/dpkg/buildtools.mk
+
+%:
+	dh ${@}
+
+override_dh_auto_configure:
+	dh_auto_configure -- CXX='$(CXX) -g' CXXFLAGS='-Wall -Wextra $(CXXFLAGS)'
+
+override_dh_auto_install:
+	dh_auto_install -- DESTDIR=$(CURDIR)/debian/lzip
+
+execute_after_dh_auto_install:
+	# update-alternatives
+	mv debian/lzip/usr/bin/lzip debian/lzip/usr/bin/lzip.lzip
+	mv debian/lzip/usr/share/info/lzip.info debian/lzip/usr/share/info/lzip.lzip.info
+	mv debian/lzip/usr/share/man/man1/lzip.1 debian/lzip/usr/share/man/man1/lzip.lzip.1
+
+	# removing unused files
+	rm -f debian/lzip/usr/share/info/dir*
